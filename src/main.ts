@@ -96,24 +96,29 @@ async function run(): Promise<void> {
         console.log("LGTM. lets merge");
         // continue; // fixme
 
-        const mergeResult = await octokit.pulls.merge({
-          repo: "BlueWallet",
-          owner: "BlueWallet",
-          pull_number: pr.number,
-        });
+        try {
+          const mergeResult = await octokit.pulls.merge({
+            repo: "BlueWallet",
+            owner: "BlueWallet",
+            pull_number: pr.number,
+          });
 
-        let body = "I could not merge it.";
-        if (mergeResult.data.message.indexOf("successfully") !== -1) {
-          console.log({ mergeResult });
-          body = "Unbelievable. You, [subject name here], must be the pride of [subject hometown here]!";
+          let body = "I could not merge it.";
+          if (mergeResult.data.message.indexOf("successfully") !== -1) {
+            console.log({ mergeResult });
+            body = "Unbelievable. You, [subject name here], must be the pride of [subject hometown here]!";
+          }
+
+          await octokit.issues.createComment({
+            repo: "BlueWallet",
+            owner: "BlueWallet",
+            issue_number: pr.number,
+            body,
+          });
+        } catch (error) {
+          console.warn(error.message);
         }
 
-        await octokit.issues.createComment({
-          repo: "BlueWallet",
-          owner: "BlueWallet",
-          issue_number: pr.number,
-          body,
-        });
       }
 
       console.log("=======================================================\n");

@@ -20,6 +20,33 @@ async function run(): Promise<void> {
     for (const pr of pullRequests) {
       console.log(`${pr.title} (${pr.number})`);
 
+      // cleaning up old glados comments.
+      // comments are sorted by default
+      const comments = await octokit.request(
+        "GET " + pr.comments_url + "?per_page=1000"
+      );
+      if (comments?.data?.length >= 1) {
+        const filteredComments = comments.data.filter(
+          (c) => c?.user?.login === "GladosBlueWallet"
+        );
+        const deleteMax = filteredComments.length - 1;
+        let deleted = 0;
+        for (const comment of filteredComments) {
+          if (deleted++ >= deleteMax) break;
+          console.warn("deleting comment", comment.id, "from PR", pr.number);
+
+          await octokit.request(
+            "DELETE /repos/{owner}/{repo}/issues/comments/{comment_id}",
+            {
+              repo: "BlueWallet",
+              owner: "BlueWallet",
+              comment_id: comment.id,
+            }
+          );
+        }
+      }
+      // end comments cleanup
+
       let approved = false;
       let e2ePassed = false;
       let unitTestsPassed = false;
@@ -118,7 +145,6 @@ async function run(): Promise<void> {
         } catch (error) {
           console.warn(error.message);
         }
-
       }
 
       console.log("=======================================================\n");

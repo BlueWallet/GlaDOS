@@ -74,6 +74,7 @@ async function run(): Promise<void> {
       for (const check of checks.data.check_runs) {
         if (check.name.startsWith("Travis CI") && check.conclusion === "success") e2ePassed = true;
         if (check.name === 'e2e' && check.conclusion === "success") e2ePassed = true;
+        if (check.name === 'test' && check.conclusion === "success") unitTestsPassed = true;
         // so if Travis or GithubActions passes - it still gets green lights since its the same set of tests
       }
 

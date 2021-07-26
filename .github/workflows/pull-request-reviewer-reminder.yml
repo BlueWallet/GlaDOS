@@ -1,0 +1,15 @@
+name: 'Pull request reviewer reminder'
+on:
+  schedule:
+    - cron: '* * * * 1-5'
+
+jobs:
+  pull-request-reviewer-reminder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: install
+        run: npm i
+
+      - name: notify
+        run: ./node_modules/.bin/ts-node src/main-pr-review-reminders.ts
+

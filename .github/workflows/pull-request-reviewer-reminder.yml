@@ -7,9 +7,12 @@ jobs:
   pull-request-reviewer-reminder:
     runs-on: ubuntu-latest
     steps:
-      - name: install
-        run: npm i
+      - uses: actions/checkout@v2
 
-      - name: notify
-        run: ./node_modules/.bin/ts-node src/main-pr-review-reminders.ts
+      - name: Use Node.js
+        uses: actions/setup-node@v1
 
+      - name: Build & run
+        run: |
+          npm install --production
+          ./node_modules/.bin/ts-node src/main-pr-review-reminders.ts

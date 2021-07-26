@@ -18,7 +18,6 @@ async function run(): Promise<void> {
     });
 
     for (const pr of pullRequests) {
-      if (pr.number != 2854) continue; // debug fixme
       console.log(`${pr.title} (${pr.number})`);
 
       const _requestedReviewers = {};

@@ -27,7 +27,7 @@ async function run(): Promise<void> {
       );
       if (comments?.data?.length >= 1) {
         const filteredComments = comments.data.filter(
-          (c) => c?.user?.login === "GladosBlueWallet"
+          (c) => c?.user?.login === "GladosBlueWallet" && c?.body?.includes('HUGE SUCCESS')
         );
         const deleteMax = filteredComments.length - 1;
         let deleted = 0;

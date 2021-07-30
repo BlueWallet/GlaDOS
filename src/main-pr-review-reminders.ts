@@ -1,4 +1,3 @@
-import * as core from "@actions/core";
 import * as github from "@actions/github";
 
 const token = process.env.TOKEN;
@@ -19,6 +18,43 @@ async function run(): Promise<void> {
 
     for (const pr of pullRequests) {
       console.log(`${pr.title} (${pr.number})`);
+
+      let thereAreBlockerLabels = false;
+      for (const label of pr.labels) {
+        if (label.name.toUpperCase().startsWith("DO NOT MERGE") || label.name.toUpperCase().startsWith("WIP")) {
+          thereAreBlockerLabels = true;
+        }
+      }
+      if (thereAreBlockerLabels) continue;
+
+      // cleaning up old glados comments.
+      // comments are sorted by default
+      const comments = await octokit.request(
+          "GET " + pr.comments_url + "?per_page=1000"
+      );
+      if (comments?.data?.length >= 1) {
+        const filteredComments = comments.data.filter(
+            (c) => c?.user?.login === "GladosBlueWallet" && c?.body?.includes('Wake the fuck up samurai')
+        );
+
+        for (const comment of filteredComments) {
+          if (comment.created_at > new Date((+new Date()) - 24 * 3600 * 1000).toISOString()) {
+            continue;
+          }
+
+          console.warn("deleting old reminder comment", comment.id, "from PR", pr.number, 'dated', comment.created_at);
+
+          await octokit.request(
+              "DELETE /repos/{owner}/{repo}/issues/comments/{comment_id}",
+              {
+                repo: "BlueWallet",
+                owner: "BlueWallet",
+                comment_id: comment.id,
+              }
+          );
+        }
+      }
+      // end comments cleanup
 
       const _requestedReviewers = {};
 

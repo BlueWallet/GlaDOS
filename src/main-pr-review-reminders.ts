@@ -38,7 +38,7 @@ async function run(): Promise<void> {
         );
 
         for (const comment of filteredComments) {
-          if (comment.created_at > new Date((+new Date()) - 24 * 3600 * 1000).toISOString()) {
+          if (comment.created_at > new Date((+new Date()) - 23 * 3600 * 1000).toISOString()) {
             continue;
           }
 

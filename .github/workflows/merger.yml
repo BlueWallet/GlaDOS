@@ -4,7 +4,7 @@ on:
     - cron: '* * * * *'
 
 jobs:
-  pull-request-reviewer-reminder:
+  pull-request-merger:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

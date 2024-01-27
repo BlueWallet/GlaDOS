@@ -91,7 +91,7 @@ async function run(): Promise<void> {
     if (reviews.data.length >= 1) {
       let _approves = {};
       for (const review of reviews.data) {
-        if (review["state"] === "COMMENTED") continue;
+        // if (review["state"] === "COMMENTED") continue;
         if (review["state"] !== "APPROVED") {
           console.log("NOT approved by", review.user.login);
           _approves[review.user.login] = false;

@@ -16,7 +16,7 @@ async function run(): Promise<void> {
   });
 
   for (const pr of pullRequests) {
-    console.log(`${pr.title} (${pr.number})`);
+    console.log(`${pr.title} (${pr.number}), author: ${pr.user.login}`);
 
     // cleaning up old glados comments.
     // comments are sorted by default
@@ -91,6 +91,11 @@ async function run(): Promise<void> {
     if (reviews.data.length >= 1) {
       let _approves = {};
       for (const review of reviews.data) {
+        if (review.user.login === pr.user.login) {
+          // comments by the PR author do not count
+          continue;
+        }
+
         // if (review["state"] === "COMMENTED") continue;
         if (review["state"] !== "APPROVED") {
           console.log("NOT approved by", review.user.login);

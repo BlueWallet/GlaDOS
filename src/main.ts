@@ -57,7 +57,8 @@ async function run(): Promise<void> {
     for (const label of pr.labels) {
       if (
         label.name.toUpperCase().startsWith("DO NOT MERGE") ||
-        label.name.toUpperCase().startsWith("WIP")
+        label.name.toUpperCase().startsWith("WIP") || 
+        label.name.toUpperCase().startsWith("TESTFLIGHT")
       ) {
         thereAreBlockerLabels = true;
       }

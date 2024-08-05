@@ -15,6 +15,14 @@ async function run(): Promise<void> {
     state: "open",
   });
 
+
+  const { data: _repoCollaborators } = await octokit.repos.listCollaborators({
+    repo: "BlueWallet",
+    owner: "BlueWallet",
+  });
+  const repoCollaborators= _repoCollaborators.map(c => c.login);
+
+
   for (const pr of pullRequests) {
     console.log(`${pr.title} (${pr.number}), author: ${pr.user.login}`);
 
@@ -95,6 +103,13 @@ async function run(): Promise<void> {
           // comments by the PR author do not count
           continue;
         }
+
+        if (!repoCollaborators.includes(review.user.login)) {
+          // reviews by outside contributors do not count
+          continue;
+        }
+
+
 
         // if (review["state"] === "COMMENTED") continue;
         if (review["state"] !== "APPROVED") {

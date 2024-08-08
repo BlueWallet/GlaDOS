@@ -124,6 +124,11 @@ async function run(): Promise<void> {
 
       approved =
         Object.values(_approves).filter((el) => el === false).length === 0;
+
+      if (Object.keys(_approves).length === 0) {
+        // no human approves were given, only maybe bot comments
+        approved = false;
+      }
     }
 
     if (pr.requested_reviewers.length !== 0) {

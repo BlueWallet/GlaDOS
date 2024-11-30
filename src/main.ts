@@ -1,4 +1,6 @@
 import * as github from "@actions/github";
+const querystring = require('querystring');
+const https = require('https');
 
 const token = process.env.TOKEN;
 if (!token) {
@@ -58,6 +60,8 @@ async function run(): Promise<void> {
     let approved = false;
     let e2ePassed = false;
     let unitTestsPassed = false;
+    let integrationTestsPassed = false;
+    let lintTestsPassed = false;
     let thereAreBlockerLabels = false;
     let outsiderContributor =
       pr.head.repo.full_name !== "BlueWallet/BlueWallet";
@@ -87,13 +91,13 @@ async function run(): Promise<void> {
     });
 
     for (const check of checks.data.check_runs) {
-      if (check.name.startsWith("Travis CI") && check.conclusion === "success")
-        e2ePassed = true;
-      if (check.name === "e2e" && check.conclusion === "success")
-        e2ePassed = true;
-      if (check.name === "test" && check.conclusion === "success")
+      if (check.name === "e2e" && check.conclusion === "success") e2ePassed = true;
+      if (check.name === "test" && check.conclusion === "success") {
+        // in job "test" we run all of it, so if it passes - all of them passed
         unitTestsPassed = true;
-      // so if Travis or GithubActions passes - it still gets green lights since its the same set of tests
+        integrationTestsPassed = true;
+        lintTestsPassed = true;
+      }
     }
 
     if (reviews.data.length >= 1) {
@@ -145,17 +149,17 @@ async function run(): Promise<void> {
     );
 
     for (const status of statuses.data.statuses) {
-      if (
-        status.context.startsWith("ci/circleci") &&
-        status.state === "success"
-      )
-        unitTestsPassed = true;
+      if (status.context.startsWith("ci/circleci: unit") && status.state === "success") unitTestsPassed = true;
+      if (status.context.startsWith("ci/circleci: integration") && status.state === "success") integrationTestsPassed = true;
+      if (status.context.startsWith("ci/circleci: lint") && status.state === "success") lintTestsPassed = true;
     }
 
     console.log({
       approved,
       e2ePassed,
       unitTestsPassed,
+      integrationTestsPassed,
+      lintTestsPassed,
       outsiderContributor,
       thereAreBlockerLabels,
     });
@@ -164,10 +168,13 @@ async function run(): Promise<void> {
       approved &&
       e2ePassed &&
       unitTestsPassed &&
+      integrationTestsPassed &&
+      lintTestsPassed &&
       !outsiderContributor &&
       !thereAreBlockerLabels
     ) {
       console.log("LGTM. lets merge");
+      postDataToTrafficRobot('GlaDOS: Im going to merge ' + 'https://github.com/BlueWallet/BlueWallet/pull/' + pr.number + " (" + pr.title + ")", process.env.CONNECTOR_ID);
       // continue; // fixme
 
       try {
@@ -197,6 +204,37 @@ async function run(): Promise<void> {
 
     console.log("=======================================================\n");
   }
+}
+
+
+function postDataToTrafficRobot(data, connectorId) {
+  var postData = querystring.stringify({
+    data
+  });
+
+  var options = {
+    hostname: 'push.tg',
+    port: 443,
+    path: '/' + connectorId,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Length': postData.length
+    }
+  };
+
+  var req = https.request(options, (res) => {
+    res.on('data', (d) => {
+      process.stdout.write(d);
+    });
+  });
+
+  req.on('error', (e) => {
+    console.error(e);
+  });
+
+  req.write(postData);
+  req.end();
 }
 
 run();

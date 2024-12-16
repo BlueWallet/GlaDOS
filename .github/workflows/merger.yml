@@ -18,3 +18,4 @@ jobs:
           ./node_modules/.bin/ts-node src/main.ts
         env:
           TOKEN: ${{ secrets.TOKEN }}
+          CONNECTOR_ID: ${{ secrets.CONNECTOR_ID }}

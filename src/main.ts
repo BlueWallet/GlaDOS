@@ -206,8 +206,8 @@ async function run(): Promise<void> {
   }
 }
 
-
 function postDataToTrafficRobot(data, connectorId) {
+  console.log('notifying trafficRobot');
   var postData = querystring.stringify({
     data
   });
@@ -224,8 +224,8 @@ function postDataToTrafficRobot(data, connectorId) {
   };
 
   var req = https.request(options, (res) => {
-    res.on('data', (d) => {
-      process.stdout.write(d);
+    res.on("data", (d) => {
+      console.log(d);
     });
   });
 

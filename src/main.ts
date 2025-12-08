@@ -92,12 +92,9 @@ async function run(): Promise<void> {
 
     for (const check of checks.data.check_runs) {
       if (check.name === "e2e" && check.conclusion === "success") e2ePassed = true;
-      if (check.name === "test" && check.conclusion === "success") {
-        // in job "test" we run all of it, so if it passes - all of them passed
-        unitTestsPassed = true;
-        integrationTestsPassed = true;
-        lintTestsPassed = true;
-      }
+      if (check.name === "unit" && check.conclusion === "success") unitTestsPassed = true;
+      if (check.name === "lint" && check.conclusion === "success") lintTestsPassed = true;
+      if (check.name === "integration" && check.conclusion === "success") integrationTestsPassed = true;
     }
 
     if (reviews.data.length >= 1) {
@@ -112,8 +109,6 @@ async function run(): Promise<void> {
           // reviews by outside contributors do not count
           continue;
         }
-
-
 
         // if (review["state"] === "COMMENTED") continue;
         if (review["state"] !== "APPROVED") {

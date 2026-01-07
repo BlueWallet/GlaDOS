@@ -58,7 +58,8 @@ async function run(): Promise<void> {
     // end comments cleanup
 
     let approved = false;
-    let e2ePassed = false;
+    let e2eAndroidPassed = false;
+    let e2eIosPassed = false;
     let unitTestsPassed = false;
     let integrationTestsPassed = false;
     let lintTestsPassed = false;
@@ -91,7 +92,8 @@ async function run(): Promise<void> {
     });
 
     for (const check of checks.data.check_runs) {
-      if (check.name === "e2e" && check.conclusion === "success") e2ePassed = true;
+      if (check.name === "android" && check.conclusion === "success") e2eAndroidPassed = true;
+      if (check.name === "ios" && check.conclusion === "success") e2eIosPassed = true;
       if (check.name === "unit" && check.conclusion === "success") unitTestsPassed = true;
       if (check.name === "lint" && check.conclusion === "success") lintTestsPassed = true;
       if (check.name === "integration" && check.conclusion === "success") integrationTestsPassed = true;
@@ -151,7 +153,8 @@ async function run(): Promise<void> {
 
     console.log({
       approved,
-      e2ePassed,
+      e2eAndroidPassed,
+      e2eIosPassed,
       unitTestsPassed,
       integrationTestsPassed,
       lintTestsPassed,
@@ -161,7 +164,8 @@ async function run(): Promise<void> {
 
     if (
       approved &&
-      e2ePassed &&
+      e2eAndroidPassed &&
+      e2eIosPassed &&
       unitTestsPassed &&
       integrationTestsPassed &&
       lintTestsPassed &&

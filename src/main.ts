@@ -112,6 +112,11 @@ async function run(): Promise<void> {
           continue;
         }
 
+        if (review.user.login === 'GladosBlueWallet') {
+          // our own bot doesnt count
+          continue;
+        }
+
         // if (review["state"] === "COMMENTED") continue;
         if (review["state"] !== "APPROVED") {
           console.log("NOT approved by", review.user.login);

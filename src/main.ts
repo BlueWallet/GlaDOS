@@ -28,6 +28,11 @@ async function run(): Promise<void> {
   for (const pr of pullRequests) {
     console.log(`${pr.title} (${pr.number}), author: ${pr.user.login}`);
 
+    if (pr.draft) {
+      console.log(`draft PR, skipping`);
+      continue;
+    }
+
     // cleaning up old glados comments.
     // comments are sorted by default
     const comments = await octokit.request(

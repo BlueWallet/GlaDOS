@@ -28,6 +28,8 @@ async function run(): Promise<void> {
   for (const pr of pullRequests) {
     console.log(`${pr.title} (${pr.number}), author: ${pr.user.login}`);
 
+    if (pr.number !== 8532) continue; //debug
+
     if (pr.draft) {
       console.log(`draft PR, skipping`);
       continue;
@@ -96,12 +98,16 @@ async function run(): Promise<void> {
       ref: pr.head.sha,
     });
 
+    let e2e_runs_passed = 0;
     for (const check of checks.data.check_runs) {
-      if (check.name === "android" && check.conclusion === "success") e2eAndroidPassed = true;
-      if (check.name === "ios" && check.conclusion === "success") e2eIosPassed = true;
+      if (check.name === "test" && check.conclusion === "success") e2e_runs_passed++;
       if (check.name === "unit" && check.conclusion === "success") unitTestsPassed = true;
       if (check.name === "lint" && check.conclusion === "success") lintTestsPassed = true;
       if (check.name === "integration" && check.conclusion === "success") integrationTestsPassed = true;
+    }
+
+    if (e2e_runs_passed === 2) {
+      e2eIosPassed = e2eAndroidPassed = true;
     }
 
     if (reviews.data.length >= 1) {

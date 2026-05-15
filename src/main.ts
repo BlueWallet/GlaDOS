@@ -28,7 +28,7 @@ async function run(): Promise<void> {
   for (const pr of pullRequests) {
     console.log(`${pr.title} (${pr.number}), author: ${pr.user.login}`);
 
-    if (pr.number !== 8532) continue; //debug
+//    if (pr.number !== 8532) continue; //debug
 
     if (pr.draft) {
       console.log(`draft PR, skipping`);

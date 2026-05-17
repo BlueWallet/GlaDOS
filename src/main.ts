@@ -193,11 +193,37 @@ async function run(): Promise<void> {
       // continue; // fixme
 
       try {
-        const mergeResult = await octokit.pulls.merge({
+        const { data: prFull } = await octokit.pulls.get({
           repo: "BlueWallet",
           owner: "BlueWallet",
           pull_number: pr.number,
         });
+
+        let mergeResult;
+        if (prFull.commits >= 3) {
+          console.log(`PR has ${prFull.commits} commits (>=3), trying squash`);
+          try {
+            mergeResult = await octokit.pulls.merge({
+              repo: "BlueWallet",
+              owner: "BlueWallet",
+              pull_number: pr.number,
+              merge_method: "squash",
+            });
+          } catch (squashError) {
+            console.warn("squash failed, falling back to regular merge:", squashError.message);
+            mergeResult = await octokit.pulls.merge({
+              repo: "BlueWallet",
+              owner: "BlueWallet",
+              pull_number: pr.number,
+            });
+          }
+        } else {
+          mergeResult = await octokit.pulls.merge({
+            repo: "BlueWallet",
+            owner: "BlueWallet",
+            pull_number: pr.number,
+          });
+        }
 
         let body = "I could not merge it.";
         if (mergeResult.data.message.indexOf("successfully") !== -1) {

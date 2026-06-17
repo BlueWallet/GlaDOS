@@ -98,16 +98,28 @@ async function run(): Promise<void> {
       ref: pr.head.sha,
     });
 
-    let e2e_runs_passed = 0;
+    const { data: workflowRuns } = await octokit.actions.listWorkflowRunsForRepo({
+      repo: "BlueWallet",
+      owner: "BlueWallet",
+      head_sha: pr.head.sha,
+    });
+    const suiteToWorkflow = new Map(
+      workflowRuns.workflow_runs
+        .filter((run) => run.check_suite_id != null)
+        .map((run) => [run.check_suite_id!, run.name])
+    );
+
     for (const check of checks.data.check_runs) {
-      if (check.name === "test" && check.conclusion === "success") e2e_runs_passed++;
+      const suiteId = check.check_suite?.id;
+      const workflowName = suiteId != null ? suiteToWorkflow.get(suiteId) : undefined;
+
+      if (check.conclusion === "success" && check.name === "test") {
+        if (workflowName?.includes("iOS")) e2eIosPassed = true;
+        if (workflowName?.includes("Android")) e2eAndroidPassed = true;
+      }
       if (check.name === "unit" && check.conclusion === "success") unitTestsPassed = true;
       if (check.name === "lint" && check.conclusion === "success") lintTestsPassed = true;
       if (check.name === "integration" && check.conclusion === "success") integrationTestsPassed = true;
-    }
-
-    if (e2e_runs_passed === 2) {
-      e2eIosPassed = e2eAndroidPassed = true;
     }
 
     if (reviews.data.length >= 1) {

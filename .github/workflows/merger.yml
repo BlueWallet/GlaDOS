@@ -1,7 +1,7 @@
 name: Merges pull requests
 on:
   schedule:
-    - cron: '* * * * *'
+    - cron: '*/20 * * * *'
 
 jobs:
   pull-request-merger:

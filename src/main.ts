@@ -1,4 +1,5 @@
 import * as github from "@actions/github";
+import { listAllOpenPullRequests } from "./list-open-prs";
 const querystring = require('querystring');
 const https = require('https');
 
@@ -45,11 +46,7 @@ async function mergePullRequestAsync(octokit, pullNumber, mergeMethod?) {
 async function run(): Promise<void> {
   const octokit = github.getOctokit(token);
 
-  const { data: pullRequests } = await octokit.pulls.list({
-    repo: "BlueWallet",
-    owner: "BlueWallet",
-    state: "open",
-  });
+  const pullRequests = await listAllOpenPullRequests(octokit);
 
 
   const { data: _repoCollaborators } = await octokit.repos.listCollaborators({

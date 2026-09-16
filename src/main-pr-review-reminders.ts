@@ -1,4 +1,5 @@
 import * as github from "@actions/github";
+import { listAllOpenPullRequests } from "./list-open-prs";
 
 const token = process.env.TOKEN;
 if (!token) {
@@ -9,11 +10,7 @@ if (!token) {
 async function run(): Promise<void> {
   const octokit = github.getOctokit(token);
 
-  const { data: pullRequests } = await octokit.pulls.list({
-    repo: "BlueWallet",
-    owner: "BlueWallet",
-    state: "open",
-  });
+  const pullRequests = await listAllOpenPullRequests(octokit);
 
   for (const pr of pullRequests) {
     console.log(`${pr.title} (${pr.number})`);

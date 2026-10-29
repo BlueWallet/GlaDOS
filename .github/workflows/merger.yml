@@ -2,6 +2,7 @@ name: Merges pull requests
 on:
   schedule:
     - cron: '*/30 * * * *'
+  workflow_dispatch:
 
 jobs:
   pull-request-merger:

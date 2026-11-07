@@ -1,5 +1,6 @@
 import * as github from "@actions/github";
 import { listAllOpenPullRequests } from "./list-open-prs";
+import { reviewsAllowMerge } from "./review-approval";
 const querystring = require('querystring');
 const https = require('https');
 
@@ -154,40 +155,11 @@ async function run(): Promise<void> {
     }
 
     if (reviews.data.length >= 1) {
-      let _approves = {};
-      for (const review of reviews.data) {
-        if (review.user.login === pr.user.login) {
-          // comments by the PR author do not count
-          continue;
-        }
-
-        if (!repoCollaborators.includes(review.user.login)) {
-          // reviews by outside contributors do not count
-          continue;
-        }
-
-        if (review.user.login === 'GladosBlueWallet') {
-          // our own bot doesnt count
-          continue;
-        }
-
-        // if (review["state"] === "COMMENTED") continue;
-        if (review["state"] !== "APPROVED") {
-          console.log("NOT approved by", review.user.login);
-          _approves[review.user.login] = false;
-        } else {
-          console.log("approved by", review.user.login);
-          _approves[review.user.login] = true;
-        }
-      }
-
-      approved =
-        Object.values(_approves).filter((el) => el === false).length === 0;
-
-      if (Object.keys(_approves).length === 0) {
-        // no human approves were given, only maybe bot comments
-        approved = false;
-      }
+      approved = reviewsAllowMerge(
+        reviews.data,
+        pr.user.login,
+        repoCollaborators
+      );
     }
 
     if (pr.requested_reviewers.length !== 0) {

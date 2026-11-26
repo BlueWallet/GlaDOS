@@ -115,14 +115,12 @@ async function run(): Promise<void> {
       }
     }
 
-    const reviews = await octokit.request(
-      "GET /repos/{owner}/{repo}/pulls/{ref}/reviews",
-      {
-        repo: "BlueWallet",
-        owner: "BlueWallet",
-        ref: pr.number,
-      }
-    );
+    const reviews = await octokit.paginate(octokit.pulls.listReviews, {
+      repo: "BlueWallet",
+      owner: "BlueWallet",
+      pull_number: pr.number,
+      per_page: 100,
+    });
 
     const checks = await octokit.checks.listForRef({
       repo: "BlueWallet",
@@ -154,9 +152,9 @@ async function run(): Promise<void> {
       if (check.name === "integration" && check.conclusion === "success") integrationTestsPassed = true;
     }
 
-    if (reviews.data.length >= 1) {
+    if (reviews.length >= 1) {
       approved = reviewsAllowMerge(
-        reviews.data,
+        reviews,
         pr.user.login,
         repoCollaborators
       );
